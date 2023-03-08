@@ -56,8 +56,16 @@ void Cloth::simulation_step(){
 	///TODO:
 	
 	///first, you need to clear force accumulators for all the particles
+	int size = pVector.size();
+	for (int i=0; i<size; ++i){
+		pVector[i]->clearForce();
+	}
 
 	///second, apply forces to them
+	int size = fVector.size();
+	for (int i=0; i<size; ++i){
+		fVector[i]->apply_force();
+	}
 
 	///if you want to implement hard constraints, the third step is to calculate constraint forces
 	///for the basic cloth simulation, you can skip this.
@@ -77,7 +85,7 @@ void Cloth::euler_step(){
 
 	for(ii=0; ii<size; ii++){
 		pVector[ii]->m_Position += dt*pVector[ii]->m_Velocity;
-		pVector[ii]->m_Velocity = DAMP*pVector[ii]->m_Velocity + make_vector< float >(RAND, RAND, 0.0)*0.005;
+		pVector[ii]->m_Velocity = DAMP*(pVector[ii]->m_Velocity) + dt*pVector[ii]->m_ForceAccumulator/pVector[ii]->m_Mass;
 	}
 }
 

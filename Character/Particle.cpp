@@ -33,6 +33,7 @@ void Particle::draw()
 
 void Particle::clearForce()
 {
-	///TODO
+	///TODO : reset applied force on this particle
+	m_ForceAccumulator = make_vector< float >(0.0f, 0.0f, 0.0f);
 }
 

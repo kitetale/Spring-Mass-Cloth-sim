@@ -16,5 +16,24 @@ void SpringForce::draw()
 void SpringForce::apply_force()
 {
 	///TODO
+	// accumulated force of the first particle
+	Vector3f pdiff = m_p1->m_Position - m_p2->m_Position;
+	Vector3f vdiff = m_p1->m_Velocity-m_p2->m_Velocity;
+	float pdiffmag = length(pdiff);
+	Vector3f pdiffnorm = pdiff/pdiffmag;
+
+	float spring = m_ks*(pdiffmag-m_dist);
+	float damp = m_kd*(vdiff*pdiff)/pdiffmag;
+
+	Vector3f force1 = -(spring+damp)*pdiffnorm;
+
+	// set accumulated force of the first particle
+	m_p1->m_ForceAccumulator = force1;
+
+	// accumulated force of the first particle
+	Vector3f force2 = -force1;
+
+	// set accumulated force of the second particle
+	m_p2->m_ForceAccumulator = force2;
 }
 
