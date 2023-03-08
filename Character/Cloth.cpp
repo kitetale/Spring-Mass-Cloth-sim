@@ -62,8 +62,8 @@ void Cloth::simulation_step(){
 	}
 
 	///second, apply forces to them
-	int size = fVector.size();
-	for (int i=0; i<size; ++i){
+	int fsize = fVector.size();
+	for (int i=0; i<fsize; ++i){
 		fVector[i]->apply_force();
 	}
 

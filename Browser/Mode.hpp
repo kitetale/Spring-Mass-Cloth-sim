@@ -1,7 +1,7 @@
 #ifndef MODE_HPP
 #define MODE_HPP
 
-#include <SDL.h>
+#include "Dependencies/SDL-1.2.15/include/SDL.h"
 
 /*
  * This is the generic 'mode' class which encompases a current game state.
