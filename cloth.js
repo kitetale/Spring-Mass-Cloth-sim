@@ -207,7 +207,7 @@ class Cloth{
         }
     
         ///second, apply forces to them
-        let fsize = pVector.length;
+        let fsize = fVector.length;
         for (var i=0; i<fsize; ++i){
             // pVector[i].m_ForceAccumulator = [0,9.81,0];
             fVector[i].apply_force();
