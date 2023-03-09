@@ -1,9 +1,14 @@
-'use strict';
+// make sure we don't use random variable values -- instead say what's undefined
+'use strict'; 
 
 let maxWidth = 650;
 let maxHeight = 480;
 let padding = 50;
 
+// --------------------------- INTERACTION -------------------------------------
+
+
+// ------------------------ SOME VEC3 MATH FUNC --------------------------------
 function vec3plus (a,b){
     return [a[0]+b[0],a[1]+b[1],a[2]+b[2]];
 }
@@ -270,3 +275,8 @@ function draw() {
 }
 // cloth.draw();
 window.requestAnimationFrame(draw);
+
+function playSimulation(){
+    cloth.reset();
+    window.requestAnimationFrame(draw);
+}
