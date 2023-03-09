@@ -12,7 +12,15 @@ function vec3length(a){
     return Math.sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
 }
 function vec3mult(a,s){
-    return [a[0]*s,a[1]*s,a[2]*s];
+    let a0,a1,a2 = 0;
+    if (s==0) return [0,0,0];
+    if (a[0]==0) a0 = 0;
+    else a0 = a[0]*s;
+    if (a[1]==0) a1 = 0;
+    else a1 = a[1]*s;
+    if (a[2]==0) a2 = 0;
+    else a2 = a[2]*s;
+    return [a0,a1,a2];
 }
 function vec3div(a,s){
     return [a[0]/s,a[1]/s,a[2]/s];
@@ -49,7 +57,7 @@ class Particle {
 
     clearForce() {
 	    //reset applied force on this particle
-	    this.m_ForceAccumulator = [0,0,0];
+	    this.m_ForceAccumulator = [0.0,0.0,0.0];
     }
 
 }
@@ -76,21 +84,23 @@ class SpringForce{
 
     apply_force(){
         // accumulated force of the first particle
-        let pdiff = vec3minus(this.m_p1.m_Position,this.m_p2.m_Position);
-        let vdiff = vec3minus(this.m_p1.m_Velocity,this.m_p2.m_Velocity);
-        var pdiffmag = vec3length(pdiff);
+        let pdiff = vec3minus(this.m_p1.m_Position,this.m_p2.m_Position); //vec3
+        let vdiff = vec3minus(this.m_p1.m_Velocity,this.m_p2.m_Velocity); //vec3
+        var pdiffmag = vec3length(pdiff); //
         let pdiffnorm = vec3div(pdiff,pdiffmag);
 
         var spring = this.m_ks * (pdiffmag-this.m_dist);
         var damping = this.m_kd * vec3dot(vdiff,pdiff) / pdiffmag;
 
-        let force1 = vec3mult(pdiffnorm,-(spring+damping));
+        var fscaler = (spring+damping == 0)? 0 : -(spring+damping);
+        let force1 = vec3mult(pdiffnorm,fscaler);
 
         // set accumulated force of the first particle
         this.m_p1.m_ForceAccumulator = force1;
+        console.assert(isNaN(force1[0]) === false || isNaN(force1[1]) === false || isNaN(force1[2]) === false);
 
         // accumulated force of the first particle
-        let force2 = -force1;
+        let force2 = vec3mult(force1,-1);
 
         // set accumulated force of the second particle
         this.m_p2.m_ForceAccumulator = force2;
