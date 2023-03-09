@@ -122,7 +122,9 @@ class Cloth{
 
         let xOffset = (maxWidth-padding*2)/(colN-1);
         let yOffset = (maxHeight-padding*2)/(rowN-1);
-        let restLength = 100.0;
+        let rest_stretch = 100.0;
+        let rest_sheer = 150.0;
+        let rest_bend = 200.0;
 
         let ks_stretch = 0.1;
         let kd_stretch = 0.1;
@@ -139,26 +141,39 @@ class Cloth{
         }
 
         // spring force construct
-        // stretch strings
+        // stretch strings (red)
         for (var i=0; i<rowN; i++){
             for (var j=0; j<colN; j++){
                 // horizontal
                 if (j<colN-1){
-                    fVector.push(new SpringForce(pVector[i*colN+j], pVector[i*colN+(j+1)], restLength, kd_stretch, ks_stretch, ctx));
+                    fVector.push(new SpringForce(pVector[i*colN+j], pVector[i*colN+(j+1)], rest_stretch, kd_stretch, ks_stretch, ctx));
                 }
                 // vertical
                 if (i<rowN-1){
-                    fVector.push(new SpringForce(pVector[i*colN+j], pVector[(i+1)*colN+j], restLength, kd_stretch, ks_stretch, ctx));
+                    fVector.push(new SpringForce(pVector[i*colN+j], pVector[(i+1)*colN+j], rest_stretch, kd_stretch, ks_stretch, ctx));
                 }
             }
         }
-        // sheer strings
+        // sheer strings (green)
         for (var i=0; i<rowN-1; i++){
             for (var j=0; j<colN-1; j++){
                 // \ diagonal
-                fVector.push(new SpringForce(pVector[i*colN+j], pVector[(i+1)*colN+(j+1)], restLength, kd_sheer, ks_sheer, ctx));
+                fVector.push(new SpringForce(pVector[i*colN+j], pVector[(i+1)*colN+(j+1)], rest_sheer, kd_sheer, ks_sheer, ctx));
                 // / diagonal
-                fVector.push(new SpringForce(pVector[(i+1)*colN+j], pVector[i*colN+(j+1)], restLength, kd_sheer, ks_sheer, ctx));
+                fVector.push(new SpringForce(pVector[(i+1)*colN+j], pVector[i*colN+(j+1)], rest_sheer, kd_sheer, ks_sheer, ctx));
+            }
+        }
+        // bend strings (blue)
+        for (var i=0; i<rowN; i++){
+            for (var j=0; j<colN; j++){
+                // right jump connection for bending cloth
+                if (j<colN-2){
+                    fVector.push(new SpringForce(pVector[i*colN+j], pVector[i*colN+(j+2)], rest_bend, kd_bend, ks_bend, ctx));
+                }
+                // down jump connection
+                if (i<rowN-2){
+                    fVector.push(new SpringForce(pVector[i*colN+j], pVector[(i+2)*colN+j], rest_bend, kd_bend, ks_bend, ctx));
+                }
             }
         }
 
@@ -179,9 +194,10 @@ class Cloth{
     
         size = fVector.length;
         for(var ii=0; ii<size; ii++){
-            if (ii<(this.rowN*(this.colN-1)+this.colN*(this.rowN-1))){ 
+            let stretchCount = (this.rowN*(this.colN-1)+this.colN*(this.rowN-1));
+            if (ii<stretchCount){ 
                 ctx.strokeStyle = 'Crimson';
-            } else if (ii>=(this.rowN*(this.colN-1)+this.colN*(this.rowN-1))){ 
+            } else if (ii>=stretchCount&& ii<stretchCount+(this.rowN-1)*(this.colN-1)*2){ 
                 ctx.strokeStyle = 'ForestGreen';
             } else {
                 ctx.strokeStyle = 'SteelBlue';
