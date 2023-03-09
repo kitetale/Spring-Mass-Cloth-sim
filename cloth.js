@@ -4,9 +4,7 @@
 let maxWidth = 650;
 let maxHeight = 480;
 let padding = 50;
-
-// --------------------------- INTERACTION -------------------------------------
-
+let r = 10; // radius of particle circle
 
 // ------------------------ SOME VEC3 MATH FUNC --------------------------------
 function vec3plus (a,b){
@@ -55,7 +53,6 @@ class Particle {
     draw() {
         let x = this.m_Position[0]/this.m_Position[2];
         let y = this.m_Position[1]/this.m_Position[2];
-        let r = 10;
         
 		this.ctx.beginPath();
 		this.ctx.moveTo(x + r, y);
@@ -280,3 +277,70 @@ function playSimulation(){
     cloth.reset();
     window.requestAnimationFrame(draw);
 }
+
+// --------------------------- INTERACTION -------------------------------------
+let getMouseCoords = (e) => {
+    let canvasCoords = canvas.getBoundingClientRect()
+    return {
+        x: e.pageX - canvasCoords.left,
+        y: e.pageY - canvasCoords.top
+    }
+}
+let getOffsetCoords = (e, particle) => {
+    let mouseX = e.pageX
+    let mouseY = e.pageY
+    return {
+        x: mouseX - (particle.m_Position[0]/particle.m_Position[2]),
+        y: mouseY - (particle.m_Position[1]/particle.m_Position[2])
+    }
+}
+let cursorOnPoint = (mouseX, mouseY, particle) => {
+    let particleX = (particle.m_Position[0]/particle.m_Position[2]);
+    let particleY = (particle.m_Position[1]/particle.m_Position[2]);
+    let xAxis = mouseX>particleX-r && mouseX<particleX+r;
+    let yAxis = mouseY>particleY-r && mouseY<particleY+r;
+
+    return xAxis && yAxis;
+}
+
+let dragging = false;
+let curIndex = -1;
+
+function mouseMove(e){
+    let mouseCoord = getMouseCoords(e);
+    if (dragging && curIndex>=0){
+        let p = pVector[curIndex];
+        p.m_ForceAccumulator = [0,0,0];
+        p.m_Velocity = [0,0,0];
+        let zPos = p.m_Position[2];
+        // update this particle's position to where mouse is dragging
+        p.m_Position = [mouseCoord.x*zPos,mouseCoord.y*zPos,zPos];
+    }
+}
+
+function mouseDown(e){
+    let size = pVector.length;
+    for (let i=0; i<size; i++){
+        let p = pVector[i];
+        let mouseCoord = getMouseCoords(e);
+        if (cursorOnPoint(mouseCoord.x,mouseCoord.y,p)){
+            p.m_ForceAccumulator = [0,0,0];
+            p.m_Velocity = [0,0,0];
+            let zPos = p.m_Position[2];
+            // update this particle's position to where mouse is dragging
+            p.m_Position = [mouseCoord.x*zPos,mouseCoord.y*zPos,zPos];
+            dragging = true;
+            curIndex = i;
+            canvas.onmousemove = mouseMove;
+        }
+    }
+}
+
+function mouseUp(){
+    dragging = false;
+    curIndex = -1;
+    canvas.onmousemove = null;
+}
+
+canvas.onmousedown = mouseDown;
+canvas.onmouseup = mouseUp;
