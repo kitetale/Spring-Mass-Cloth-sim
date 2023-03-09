@@ -1,3 +1,5 @@
+'use strict';
+
 let maxWidth = 650;
 let maxHeight = 480;
 let padding = 50;
@@ -42,6 +44,7 @@ class Particle {
     reset() {
         this.m_Position = this.m_ConstructPos;
         this.m_Velocity = [0.0,0.0,0.0];
+        this.m_ForceAccumulator = [0.0,0.0,0.0];
     }
 
     draw() {
@@ -86,24 +89,24 @@ class SpringForce{
         // accumulated force of the first particle
         let pdiff = vec3minus(this.m_p1.m_Position,this.m_p2.m_Position); //vec3
         let vdiff = vec3minus(this.m_p1.m_Velocity,this.m_p2.m_Velocity); //vec3
-        var pdiffmag = vec3length(pdiff); //
-        let pdiffnorm = vec3div(pdiff,pdiffmag);
+        let pdiffmag = vec3length(pdiff); //float
+        let pdiffnorm = vec3div(pdiff,pdiffmag); //vec3
 
-        var spring = this.m_ks * (pdiffmag-this.m_dist);
-        var damping = this.m_kd * vec3dot(vdiff,pdiff) / pdiffmag;
+        let spring = this.m_ks * (pdiffmag-this.m_dist); //float
+        let damping = this.m_kd * vec3dot(vdiff,pdiff) / pdiffmag; //float
 
-        var fscaler = (spring+damping == 0)? 0 : -(spring+damping);
-        let force1 = vec3mult(pdiffnorm,fscaler);
+        let fscaler = (spring+damping == 0)? 0 : -(spring+damping); //float
+        let force1 = vec3mult(pdiffnorm,fscaler); //vec3
 
         // set accumulated force of the first particle
-        this.m_p1.m_ForceAccumulator = force1;
+        this.m_p1.m_ForceAccumulator = vec3plus(this.m_p1.m_ForceAccumulator,force1);
         console.assert(isNaN(force1[0]) === false || isNaN(force1[1]) === false || isNaN(force1[2]) === false);
 
         // accumulated force of the first particle
-        let force2 = vec3mult(force1,-1);
+        let force2 = vec3mult(force1,-1); //vec3
 
         // set accumulated force of the second particle
-        this.m_p2.m_ForceAccumulator = force2;
+        this.m_p2.m_ForceAccumulator = vec3plus(this.m_p2.m_ForceAccumulator,force2);
     }
 }
 
@@ -122,9 +125,11 @@ class Cloth{
 
         let xOffset = (maxWidth-padding*2)/(colN-1);
         let yOffset = (maxHeight-padding*2)/(rowN-1);
-        let rest_stretch = 100.0;
-        let rest_sheer = 150.0;
-        let rest_bend = 200.0;
+
+        // set rest lengths to starting length
+        let rest_stretch = Math.min(xOffset,yOffset);
+        let rest_sheer = Math.sqrt(xOffset*xOffset+yOffset*yOffset);
+        let rest_bend = Math.min(xOffset+xOffset,yOffset+yOffset);
 
         let ks_stretch = 0.1;
         let kd_stretch = 0.1;
@@ -134,16 +139,16 @@ class Cloth{
         let kd_bend = 0.1;
 
         // particle construct
-        for (var i=0; i<rowN; i++){
-            for (var j=0; j<colN; j++){
+        for (let i=0; i<rowN; i++){
+            for (let j=0; j<colN; j++){
                 pVector.push(new Particle([padding+j*xOffset,padding+i*yOffset,1.0],ctx))
             }
         }
 
         // spring force construct
         // stretch strings (red)
-        for (var i=0; i<rowN; i++){
-            for (var j=0; j<colN; j++){
+        for (let i=0; i<rowN; i++){
+            for (let j=0; j<colN; j++){
                 // horizontal
                 if (j<colN-1){
                     fVector.push(new SpringForce(pVector[i*colN+j], pVector[i*colN+(j+1)], rest_stretch, kd_stretch, ks_stretch, ctx));
@@ -154,9 +159,10 @@ class Cloth{
                 }
             }
         }
+        
         // sheer strings (green)
-        for (var i=0; i<rowN-1; i++){
-            for (var j=0; j<colN-1; j++){
+        for (let i=0; i<rowN-1; i++){
+            for (let j=0; j<colN-1; j++){
                 // \ diagonal
                 fVector.push(new SpringForce(pVector[i*colN+j], pVector[(i+1)*colN+(j+1)], rest_sheer, kd_sheer, ks_sheer, ctx));
                 // / diagonal
@@ -164,8 +170,8 @@ class Cloth{
             }
         }
         // bend strings (blue)
-        for (var i=0; i<rowN; i++){
-            for (var j=0; j<colN; j++){
+        for (let i=0; i<rowN; i++){
+            for (let j=0; j<colN; j++){
                 // right jump connection for bending cloth
                 if (j<colN-2){
                     fVector.push(new SpringForce(pVector[i*colN+j], pVector[i*colN+(j+2)], rest_bend, kd_bend, ks_bend, ctx));
@@ -181,19 +187,19 @@ class Cloth{
 
     reset(){
         let size = pVector.length;
-        for(var ii=0; ii<size; ii++){
+        for(let ii=0; ii<size; ii++){
             pVector[ii].reset();
         }
     }
 
     draw(){
         let size = pVector.length;
-        for(var ii=0; ii<size; ii++){
+        for(let ii=0; ii<size; ii++){
             pVector[ii].draw();
         }
     
         size = fVector.length;
-        for(var ii=0; ii<size; ii++){
+        for(let ii=0; ii<size; ii++){
             let stretchCount = (this.rowN*(this.colN-1)+this.colN*(this.rowN-1));
             if (ii<stretchCount){ 
                 ctx.strokeStyle = 'Crimson';
@@ -209,7 +215,7 @@ class Cloth{
     euler_step(){
         let size = pVector.length;
     
-        for(var ii=0; ii<size; ii++){
+        for(let ii=0; ii<size; ii++){
             pVector[ii].m_Position = vec3plus(pVector[ii].m_Position, vec3mult(pVector[ii].m_Velocity, this.dt));
             pVector[ii].m_Velocity = vec3plus(vec3mult(pVector[ii].m_Velocity, damp), vec3mult(pVector[ii].m_ForceAccumulator, this.dt/pVector[ii].m_Mass));
         }
@@ -218,13 +224,13 @@ class Cloth{
     simulation_step(){
         ///first, you need to clear force accumulators for all the particles
         let size = pVector.length;
-        for (var i=0; i<size; ++i){
+        for (let i=0; i<size; ++i){
             pVector[i].clearForce();
         }
     
         ///second, apply forces to them
         let fsize = fVector.length;
-        for (var i=0; i<fsize; ++i){
+        for (let i=0; i<fsize; ++i){
             // pVector[i].m_ForceAccumulator = [0,9.81,0];
             fVector[i].apply_force();
         }
@@ -245,16 +251,16 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.style.border = "1px solid black";
 
-// var p1 = new Particle([100.0,100.0,1.0],ctx);
+// let p1 = new Particle([100.0,100.0,1.0],ctx);
 // p1.draw();
 
-// var p2 = new Particle([200.0,100.0,1.0],ctx);
+// let p2 = new Particle([200.0,100.0,1.0],ctx);
 // p2.draw();
 
-// var s1 = new SpringForce(p1,p2,1,5,5,ctx);
+// let s1 = new SpringForce(p1,p2,1,5,5,ctx);
 // s1.draw();
 
-var cloth = new Cloth(5,5,ctx);
+let cloth = new Cloth(5,5,ctx);
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
