@@ -100,9 +100,14 @@ class SpringForce{
         let fscaler = (spring+damping == 0)? 0 : -(spring+damping); //float
         let force1 = vec3mult(pdiffnorm,fscaler); //vec3
 
+        // console.assert(isNaN(force1[0]) === false || isNaN(force1[1]) === false || isNaN(force1[2]) === false);
+        if (isNaN(force1[0]) === true || isNaN(force1[1]) === true || isNaN(force1[2]) === true){
+            force1 = [0,0,0];
+        }
+
         // set accumulated force of the first particle
         this.m_p1.m_ForceAccumulator = vec3plus(this.m_p1.m_ForceAccumulator,force1);
-        console.assert(isNaN(force1[0]) === false || isNaN(force1[1]) === false || isNaN(force1[2]) === false);
+        
 
         // accumulated force of the first particle
         let force2 = vec3mult(force1,-1); //vec3
@@ -133,12 +138,12 @@ class Cloth{
         let rest_sheer = Math.sqrt(xOffset*xOffset+yOffset*yOffset);
         let rest_bend = Math.min(xOffset+xOffset,yOffset+yOffset);
 
-        let ks_stretch = 0.1;
-        let kd_stretch = 0.1;
-        let ks_sheer = 0.1;
-        let kd_sheer = 0.1;
-        let ks_bend = 0.1;
-        let kd_bend = 0.1;
+        let ks_stretch = 1;
+        let kd_stretch = 1;
+        let ks_sheer = 1;
+        let kd_sheer = 0.8;
+        let ks_bend = 1;
+        let kd_bend = 0.6;
 
         // particle construct
         for (let i=0; i<rowN; i++){
@@ -252,6 +257,7 @@ class Cloth{
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.style.border = "1px solid black";
+ctx.fillStyle = "FloralWhite";
 
 // let p1 = new Particle([100.0,100.0,1.0],ctx);
 // p1.draw();
@@ -262,7 +268,7 @@ canvas.style.border = "1px solid black";
 // let s1 = new SpringForce(p1,p2,1,5,5,ctx);
 // s1.draw();
 
-let cloth = new Cloth(5,5,ctx);
+let cloth = new Cloth(18,18,ctx);
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
