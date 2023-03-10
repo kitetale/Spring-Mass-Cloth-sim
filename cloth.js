@@ -120,7 +120,7 @@ const damp = 0.98;
 
 class Cloth{
     constructor(rowN,colN,ctx){
-        this.dt = 0.01;
+        this.dt = 0.1;
         this.rowN = rowN;
         this.colN = colN;
         this.ctx = ctx;
@@ -282,13 +282,13 @@ function playSimulation(){
 let getMouseCoords = (e) => {
     let canvasCoords = canvas.getBoundingClientRect()
     return {
-        x: e.pageX - canvasCoords.left,
-        y: e.pageY - canvasCoords.top
+        x: e.clientX - canvasCoords.left,
+        y: e.clientY - canvasCoords.top
     }
 }
 let getOffsetCoords = (e, particle) => {
-    let mouseX = e.pageX
-    let mouseY = e.pageY
+    let mouseX = e.clientX
+    let mouseY = e.clientY
     return {
         x: mouseX - (particle.m_Position[0]/particle.m_Position[2]),
         y: mouseY - (particle.m_Position[1]/particle.m_Position[2])
@@ -331,7 +331,7 @@ function mouseDown(e){
             p.m_Position = [mouseCoord.x*zPos,mouseCoord.y*zPos,zPos];
             dragging = true;
             curIndex = i;
-            canvas.onmousemove = mouseMove;
+            canvas.addEventListener('mousemove',mouseMove);
         }
     }
 }
@@ -339,8 +339,8 @@ function mouseDown(e){
 function mouseUp(){
     dragging = false;
     curIndex = -1;
-    canvas.onmousemove = null;
+    canvas.removeEventListener('mousemove',mouseMove);
 }
 
-canvas.onmousedown = mouseDown;
-canvas.onmouseup = mouseUp;
+canvas.addEventListener('mousedown',mouseDown);
+canvas.addEventListener('mouseup',mouseUp);
