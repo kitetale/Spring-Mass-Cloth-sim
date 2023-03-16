@@ -189,6 +189,7 @@ class Cloth{
     destroy(){
         pVector=[];
         fVector=[];
+        delete this;
     }
 
     reset(){
@@ -286,15 +287,11 @@ function draw() {
 // cloth.draw();
 window.requestAnimationFrame(draw);
 
-function playSimulation(){
-    cloth.reset();
-    window.requestAnimationFrame(draw);
-}
 // ----------------------- RESET BUTTON --------------------------------------
 let btn = document.createElement("button");
 btn.innerHTML = "Restart";
 btn.onclick = function () {
-    playSimulation();
+    cloth.reset();
 };
 btn.style.margin = "3rem auto";
 btn.style.display = "flex";
@@ -320,11 +317,11 @@ document.getElementById("resetButton").appendChild(btn);
 
 let rowInput = document.createElement("input");
 rowInput.type = "number";
-rowInput.value = "10";
+rowInput.value = "5";
 rowInput.id = "rowInputNum";
 let colInput = document.createElement("input");
 colInput.type = "number";
-colInput.value = "10";
+colInput.value = "5";
 colInput.id = "colInputNum";
 
 rowInput.style.display = "flex";
@@ -349,7 +346,6 @@ btn1.onclick = function () {
     userRowNum = document.getElementById("rowInputNum").value;
     userColNum = document.getElementById("colInputNum").value;
     cloth = new Cloth(userRowNum,userColNum,ctx);
-    playSimulation();
 };
 btn1.style.margin = "3rem 0.5rem";
 btn1.style.display = "flex";
