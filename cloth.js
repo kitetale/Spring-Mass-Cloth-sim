@@ -1,6 +1,5 @@
 // make sure we don't use random variable values -- instead say what's undefined
-'use strict'; 
-
+//'use strict'; 
 let maxWidth = 650;
 let maxHeight = 480;
 let padding = 50;
@@ -54,15 +53,15 @@ class Particle {
         let x = this.m_Position[0]/this.m_Position[2];
         let y = this.m_Position[1]/this.m_Position[2];
         
-		this.ctx.beginPath();
-		this.ctx.moveTo(x + r, y);
-		this.ctx.arc(x, y, r, 0, Math.PI * 2, false);
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + r, y);
+        this.ctx.arc(x, y, r, 0, Math.PI * 2, false);
         this.ctx.fill();
     }
 
     clearForce() {
-	    //reset applied force on this particle
-	    this.m_ForceAccumulator = [0.0,0.0,0.0];
+        //reset applied force on this particle
+        this.m_ForceAccumulator = [0.0,0.0,0.0];
     }
 
 }
@@ -100,14 +99,9 @@ class SpringForce{
         let fscaler = (spring+damping == 0)? 0 : -(spring+damping); //float
         let force1 = vec3mult(pdiffnorm,fscaler); //vec3
 
-        // console.assert(isNaN(force1[0]) === false || isNaN(force1[1]) === false || isNaN(force1[2]) === false);
-        if (isNaN(force1[0]) === true || isNaN(force1[1]) === true || isNaN(force1[2]) === true){
-            force1 = [0,0,0];
-        }
-
         // set accumulated force of the first particle
         this.m_p1.m_ForceAccumulator = vec3plus(this.m_p1.m_ForceAccumulator,force1);
-        
+        console.assert(isNaN(force1[0]) === false || isNaN(force1[1]) === false || isNaN(force1[2]) === false);
 
         // accumulated force of the first particle
         let force2 = vec3mult(force1,-1); //vec3
@@ -138,12 +132,12 @@ class Cloth{
         let rest_sheer = Math.sqrt(xOffset*xOffset+yOffset*yOffset);
         let rest_bend = Math.min(xOffset+xOffset,yOffset+yOffset);
 
-        let ks_stretch = 1;
-        let kd_stretch = 1;
-        let ks_sheer = 1;
-        let kd_sheer = 0.8;
-        let ks_bend = 1;
-        let kd_bend = 0.6;
+        let ks_stretch = 0.1;
+        let kd_stretch = 0.1;
+        let ks_sheer = 0.1;
+        let kd_sheer = 0.1;
+        let ks_bend = 0.1;
+        let kd_bend = 0.1;
 
         // particle construct
         for (let i=0; i<rowN; i++){
@@ -190,6 +184,11 @@ class Cloth{
             }
         }
 
+    }
+
+    destroy(){
+        pVector=[];
+        fVector=[];
     }
 
     reset(){
@@ -254,10 +253,18 @@ class Cloth{
     }
 }
 
-const canvas = document.getElementById("canvas");
+
+
+// ----------------------- ADD CANVAS ---------------------------------------
+let canvas = document.createElement("canvas");
+canvas.width = "1000";
+canvas.height = "800";
+canvas.style.display = "flex";
+canvas.style.margin = "auto";
+// const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.style.border = "1px solid black";
-ctx.fillStyle = "FloralWhite";
+document.getElementById("canvas").appendChild(canvas);
 
 // let p1 = new Particle([100.0,100.0,1.0],ctx);
 // p1.draw();
@@ -268,7 +275,7 @@ ctx.fillStyle = "FloralWhite";
 // let s1 = new SpringForce(p1,p2,1,5,5,ctx);
 // s1.draw();
 
-let cloth = new Cloth(18,18,ctx);
+let cloth = new Cloth(5,5,ctx);
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -283,6 +290,86 @@ function playSimulation(){
     cloth.reset();
     window.requestAnimationFrame(draw);
 }
+// ----------------------- RESET BUTTON --------------------------------------
+let btn = document.createElement("button");
+btn.innerHTML = "Restart";
+btn.onclick = function () {
+    playSimulation();
+};
+btn.style.margin = "3rem auto";
+btn.style.display = "flex";
+btn.style.padding = "0.5rem 1rem";
+btn.style.border = "2px solid #ff8a00";
+btn.style.borderRadius = "10px";
+btn.style.backgroundColor = "white";
+
+btn.addEventListener("mouseenter", (event) => {
+    btn.style.cursor = "pointer";
+    btn.style.backgroundColor = "#ff8a00";
+    btn.style.color = "white";
+});
+btn.addEventListener("mouseleave", (event) => {
+    btn.style.backgroundColor = "white";
+    btn.style.color = "black";
+    btn.style.cursor = "default";
+});
+
+document.getElementById("resetButton").appendChild(btn);
+
+// ----------------------- ADD CONTROL BUTTONS / INPUTS ---------------------
+
+let rowInput = document.createElement("input");
+rowInput.type = "number";
+rowInput.value = "10";
+rowInput.id = "rowInputNum";
+let colInput = document.createElement("input");
+colInput.type = "number";
+colInput.value = "10";
+colInput.id = "colInputNum";
+
+rowInput.style.display = "flex";
+colInput.style.display = "flex";
+rowInput.style.margin = "2rem 0.5rem";
+colInput.style.margin = "2rem 0.5rem";
+
+let h3 = document.createElement("h3");
+h3.style.margin = "2rem 0.5rem";
+document.getElementById("updateButton").appendChild(h3);
+h3.innerHTML = "Cloth Dimension: ";
+document.getElementById("updateButton").appendChild(rowInput);
+document.getElementById("updateButton").appendChild(colInput);
+
+
+let btn1 = document.createElement("button");
+btn1.innerHTML = "Update";
+let userRowNum = 5;
+let userColNum = 5;
+btn1.onclick = function () {
+    cloth.destroy();
+    userRowNum = document.getElementById("rowInputNum").value;
+    userColNum = document.getElementById("colInputNum").value;
+    cloth = new Cloth(userRowNum,userColNum,ctx);
+    playSimulation();
+};
+btn1.style.margin = "3rem 0.5rem";
+btn1.style.display = "flex";
+btn1.style.padding = "0.5rem 1rem";
+btn1.style.border = "2px solid #ff8a00";
+btn1.style.borderRadius = "10px";
+btn1.style.backgroundColor = "white";
+
+btn1.addEventListener("mouseenter", (event) => {
+    btn1.style.cursor = "pointer";
+    btn1.style.backgroundColor = "#ff8a00";
+    btn1.style.color = "white";
+});
+btn1.addEventListener("mouseleave", (event) => {
+    btn1.style.backgroundColor = "white";
+    btn1.style.color = "black";
+    btn1.style.cursor = "default";
+});
+
+document.getElementById("updateButton").appendChild(btn1);
 
 // --------------------------- INTERACTION -------------------------------------
 let getMouseCoords = (e) => {
@@ -337,7 +424,9 @@ function mouseDown(e){
             p.m_Position = [mouseCoord.x*zPos,mouseCoord.y*zPos,zPos];
             dragging = true;
             curIndex = i;
+            // canvas.onmousemove = mouseMove;
             canvas.addEventListener('mousemove',mouseMove);
+
         }
     }
 }
@@ -345,8 +434,11 @@ function mouseDown(e){
 function mouseUp(){
     dragging = false;
     curIndex = -1;
+    // canvas.onmousemove = null;
     canvas.removeEventListener('mousemove',mouseMove);
 }
 
 canvas.addEventListener('mousedown',mouseDown);
 canvas.addEventListener('mouseup',mouseUp);
+// canvas.onmousedown = mouseDown;
+// canvas.onmouseup = mouseUp;
