@@ -118,8 +118,8 @@ let fVector = [];
 const damp = 0.98;
 
 class Cloth{
-    constructor(rowN,colN,ctx){
-        this.dt = 0.1;
+    constructor(rowN,colN,ks_stretch,kd_stretch,ks_sheer,kd_sheer,ks_bend,kd_bend,dt,ctx){
+        this.dt = dt;
         this.rowN = rowN;
         this.colN = colN;
         this.ctx = ctx;
@@ -132,12 +132,12 @@ class Cloth{
         let rest_sheer = Math.sqrt(xOffset*xOffset+yOffset*yOffset);
         let rest_bend = Math.min(xOffset+xOffset,yOffset+yOffset);
 
-        let ks_stretch = 0.1;
-        let kd_stretch = 0.1;
-        let ks_sheer = 0.1;
-        let kd_sheer = 0.1;
-        let ks_bend = 0.1;
-        let kd_bend = 0.1;
+        this.ks_stretch = ks_stretch;
+        this.kd_stretch = kd_stretch;
+        this.ks_sheer = ks_sheer;
+        this.kd_sheer = kd_sheer;
+        this.ks_bend = ks_bend;
+        this.kd_bend = kd_bend;
 
         // particle construct
         for (let i=0; i<rowN; i++){
@@ -276,7 +276,7 @@ document.getElementById("canvas").appendChild(canvas);
 // let s1 = new SpringForce(p1,p2,1,5,5,ctx);
 // s1.draw();
 
-let cloth = new Cloth(5,5,ctx);
+let cloth = new Cloth(5,5,0.2,0.2,0.2,0.2,0.2,0.2,0.1,ctx);
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -319,18 +319,20 @@ let rowInput = document.createElement("input");
 rowInput.type = "number";
 rowInput.value = "5";
 rowInput.id = "rowInputNum";
+rowInput.placeholder = "row";
 let colInput = document.createElement("input");
 colInput.type = "number";
 colInput.value = "5";
 colInput.id = "colInputNum";
+colInput.placeholder = "column";
 
 rowInput.style.display = "flex";
 colInput.style.display = "flex";
-rowInput.style.margin = "2rem 0.5rem";
-colInput.style.margin = "2rem 0.5rem";
+rowInput.style.margin = "2rem 0.5rem 0.5rem";
+colInput.style.margin = "2rem 0.5rem 0.5rem";
 
 let h3 = document.createElement("h3");
-h3.style.margin = "2rem 0.5rem";
+h3.style.margin = "2rem 0.5rem 0.5rem";
 document.getElementById("updateButton").appendChild(h3);
 h3.innerHTML = "Cloth Dimension: ";
 document.getElementById("updateButton").appendChild(rowInput);
@@ -341,13 +343,28 @@ let btn1 = document.createElement("button");
 btn1.innerHTML = "Update";
 let userRowNum = 5;
 let userColNum = 5;
+let ks_stretch = 0.2;
+let kd_stretch = 0.2;
+let ks_sheer = 0.2;
+let kd_sheer = 0.2;
+let ks_bend = 0.2;
+let kd_bend = 0.2;
+let dt = 0.1;
 btn1.onclick = function () {
     cloth.destroy();
     userRowNum = document.getElementById("rowInputNum").value;
     userColNum = document.getElementById("colInputNum").value;
-    cloth = new Cloth(userRowNum,userColNum,ctx);
+    ks_stretch = document.getElementById("ks_stretch").value;
+    kd_stretch = document.getElementById("kd_stretch").value;
+    ks_sheer = document.getElementById("ks_sheer").value;
+    kd_sheer = document.getElementById("kd_sheer").value;
+    ks_bend = document.getElementById("ks_bend").value;
+    kd_bend = document.getElementById("kd_bend").value;
+    dt = document.getElementById("dt").value;
+
+    cloth = new Cloth(userRowNum,userColNum,ks_stretch,kd_stretch,ks_sheer,kd_sheer,ks_bend,kd_bend,dt,ctx);
 };
-btn1.style.margin = "3rem 0.5rem";
+btn1.style.margin = "2rem 0.5rem 0.5rem";
 btn1.style.display = "flex";
 btn1.style.padding = "0.5rem 1rem";
 btn1.style.border = "2px solid #ff8a00";
@@ -366,6 +383,96 @@ btn1.addEventListener("mouseleave", (event) => {
 });
 
 document.getElementById("updateButton").appendChild(btn1);
+
+// STRETCH INPUTS
+let stretch_ks = document.createElement("input");
+stretch_ks.type = "number";
+stretch_ks.value = "0.2";
+stretch_ks.id = "ks_stretch";
+stretch_ks.placeholder="ks";
+stretch_ks.size = "5";
+stretch_ks.style.margin = "1rem 0.5rem 2rem";
+stretch_ks.style.width = "60px";
+let stretch_kd = document.createElement("input");
+stretch_kd.type = "number";
+stretch_kd.value = "0.2";
+stretch_kd.id = "kd_stretch";
+stretch_kd.placeholder="kd";
+stretch_kd.size = "5";
+stretch_kd.style.margin = "1rem 0.5rem 2rem";
+stretch_kd.style.width = "60px";
+let h3_stretch = document.createElement("h3");
+h3_stretch.style.margin = "1rem 0.5rem 2rem";
+
+document.getElementById("parameters").appendChild(h3_stretch);
+h3_stretch.innerHTML = "Stretch: ";
+document.getElementById("parameters").appendChild(stretch_ks);
+document.getElementById("parameters").appendChild(stretch_kd);
+
+// SHEER INPUTS
+let sheer_ks = document.createElement("input");
+sheer_ks.type = "number";
+sheer_ks.value = "0.2";
+sheer_ks.id = "ks_sheer";
+sheer_ks.placeholder="ks";
+sheer_ks.size = "5";
+sheer_ks.style.margin = "1rem 0.5rem 2rem";
+sheer_ks.style.width = "60px";
+let sheer_kd = document.createElement("input");
+sheer_kd.type = "number";
+sheer_kd.value = "0.2";
+sheer_kd.id = "kd_sheer";
+sheer_kd.placeholder="kd";
+sheer_kd.size = "5";
+sheer_kd.style.margin = "1rem 0.5rem 2rem";
+sheer_kd.style.width = "60px";
+let h3_sheer = document.createElement("h3");
+h3_sheer.style.margin = "1rem 0.5rem 2rem 2.5rem";
+
+document.getElementById("parameters").appendChild(h3_sheer);
+h3_sheer.innerHTML = "Sheer: ";
+document.getElementById("parameters").appendChild(sheer_ks);
+document.getElementById("parameters").appendChild(sheer_kd);
+
+// BEND INPUTS
+let bend_ks = document.createElement("input");
+bend_ks.type = "number";
+bend_ks.value = "0.2";
+bend_ks.id = "ks_bend";
+bend_ks.placeholder="ks";
+bend_ks.size = "5";
+bend_ks.style.margin = "1rem 0.5rem 2rem";
+bend_ks.style.width = "60px";
+let bend_kd = document.createElement("input");
+bend_kd.type = "number";
+bend_kd.value = "0.2";
+bend_kd.id = "kd_bend";
+bend_kd.placeholder="kd";
+bend_kd.size = "5";
+bend_kd.style.margin = "1rem 0.5rem 2rem";
+bend_kd.style.width = "60px";
+let h3_bend = document.createElement("h3");
+h3_bend.style.margin = "1rem 0.5rem 2rem 2.5rem";
+
+document.getElementById("parameters").appendChild(h3_bend);
+h3_bend.innerHTML = "Bend: ";
+document.getElementById("parameters").appendChild(bend_ks);
+document.getElementById("parameters").appendChild(bend_kd);
+
+// dt INPUT
+let dt_input = document.createElement("input");
+dt_input.type = "number";
+dt_input.value = "0.1";
+dt_input.id = "dt";
+dt_input.placeholder="dt";
+dt_input.size = "5";
+dt_input.style.margin = "1rem 0.5rem 2rem";
+dt_input.style.width = "60px";
+let h3_dt = document.createElement("h3");
+h3_dt.style.margin = "1rem 0.5rem 2rem 2.5rem";
+document.getElementById("parameters").appendChild(h3_dt);
+h3_dt.innerHTML = "dt: ";
+document.getElementById("parameters").appendChild(dt_input);
 
 // --------------------------- INTERACTION -------------------------------------
 let getMouseCoords = (e) => {
