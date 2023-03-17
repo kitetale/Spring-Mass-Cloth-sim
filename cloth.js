@@ -32,6 +32,8 @@ function vec3div(a,s){
 function vec3dot(a,b){
     return (a[0]*b[0]+a[1]*b[1]+a[2]*b[2]);
 }
+
+let pt_mass = 1;
 // --------------------------- PARTICLE -------------------------------
 class Particle {
     constructor(ConstructPos,ctx){
@@ -39,7 +41,7 @@ class Particle {
         this.m_Position = ConstructPos;
         this.m_Velocity = [0.0,0.0,0.0];
         this.m_ForceAccumulator = [0.0,0.0,0.0];
-        this.m_Mass = 1.0;
+        this.m_Mass = pt_mass;
         this.ctx = ctx;
     }
 
@@ -116,6 +118,7 @@ class SpringForce{
 let pVector = [];
 let fVector = [];
 const damp = 0.98;
+let displayPts = true;
 
 class Cloth{
     constructor(rowN,colN,ks_stretch,kd_stretch,ks_sheer,kd_sheer,ks_bend,kd_bend,dt,ctx){
@@ -201,8 +204,10 @@ class Cloth{
 
     draw(){
         let size = pVector.length;
-        for(let ii=0; ii<size; ii++){
-            pVector[ii].draw();
+        if (displayPts){
+            for(let ii=0; ii<size; ii++){
+                pVector[ii].draw();
+            }
         }
     
         size = fVector.length;
@@ -362,6 +367,8 @@ btn1.onclick = function () {
     kd_bend = document.getElementById("kd_bend").value;
     dt = document.getElementById("dt").value;
 
+    displayPts = document.getElementById("display_pts").checked;
+
     cloth = new Cloth(userRowNum,userColNum,ks_stretch,kd_stretch,ks_sheer,kd_sheer,ks_bend,kd_bend,dt,ctx);
 };
 btn1.style.margin = "2rem 0.5rem 0.5rem";
@@ -473,6 +480,33 @@ h3_dt.style.margin = "1rem 0.5rem 2rem 2.5rem";
 document.getElementById("parameters").appendChild(h3_dt);
 h3_dt.innerHTML = "dt: ";
 document.getElementById("parameters").appendChild(dt_input);
+
+// DISPLAY OPTIONS
+let h3_pts_m = document.createElement("h3");
+h3_pts_m.style.margin = "0rem 0.5rem 2rem 0.5rem";
+document.getElementById("displayOptions").appendChild(h3_pts_m);
+h3_pts_m.innerHTML = "Particle Mass: ";
+let m_input = document.createElement("input");
+m_input.type = "number";
+m_input.value = "1";
+m_input.id = "mass";
+m_input.placeholder="dt";
+m_input.size = "5";
+m_input.style.margin = "0rem 0rem 2rem 0.5rem";
+m_input.style.width = "60px";
+document.getElementById("displayOptions").appendChild(m_input);
+
+
+let h3_pts = document.createElement("h3");
+h3_pts.style.margin = "0rem 0.5rem 2rem 2.5rem";
+document.getElementById("displayOptions").appendChild(h3_pts);
+h3_pts.innerHTML = "Display Points: ";
+let display_pts = document.createElement("input");
+display_pts.type = "checkbox";
+display_pts.checked = "true";
+display_pts.id = "display_pts";
+display_pts.style.margin = "0rem 0.5rem 2rem";
+document.getElementById("displayOptions").appendChild(display_pts);
 
 // --------------------------- INTERACTION -------------------------------------
 let getMouseCoords = (e) => {
