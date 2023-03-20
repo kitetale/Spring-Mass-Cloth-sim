@@ -1,11 +1,12 @@
-# Assignment 2. Simulation
+# Spring-Mass Cloth simulation
 Ashley Kim (ayk2@andrew.cmu.edu) <br/>
 3/20/2023
 
-## Part 1 : Spring-Mass Cloth simulation ##
-![screenshot of cloth simulation webpage](./cloth_sim.png)
-Based on the Spring-Mass Model, I created a cloth simulation with the three types of spring dampers: *stretch springs, sheer springs,* and *bend springs.*
+Based on the Spring-Mass Model method, I created a cloth simulation with the three types of spring dampers: *stretch springs, sheer springs,* and *bend springs.*
 I used javascript on html canvas to both draw and keep track of parameters for the particle points and spring edges. 
+
+![screenshot of cloth simulation webpage](./cloth_sim.png)
+
 Each type of spring dampers are indicated using different colors:
 
 * Stretch springs: red
@@ -13,7 +14,15 @@ Each type of spring dampers are indicated using different colors:
 * Bend springs: blue
 
 
-### Interaction ###
+
+## How to Open ##
+
+To interact with the simulation, simply clone this repo and open `clothsim.html` file on a browser. <br/> Alternatively, you can also interact with the same simulator on my [website](https://www.yjashleykim.com/cloth/).
+
+If you have dependencies for [AMC Viewer](https://github.com/se210/AMCViewer) installed, you can also use `jam` to compile.
+
+
+## How to Interact ##
 Users can interact with this cloth simulation by **dragging** the particle points around the canvas using the cursor. 
 The cloth will instantly follow and react to the movement defined by the user's mouse moves.
 
@@ -33,8 +42,13 @@ Cloth model can be updated or respawn from the starting position by clicking on 
 
 Note that update button should be pressed to generate a new cloth model with indicated constant values.
 
+## Things to Note ##
+Since this simulator is based on Spring-Mass Model, it is not always stable with all parameter values. For instance, high timestep (dt) value could easily make cloth simulation unstable. I suggest you to not exceed 0.2 with dt.
 
-### Example Cloth Simulations ###
+Please press the restart button below the canvas when the cloth simulation goes unstable. 
+
+
+## Example Cloth Simulations ##
 1. Thin cloth (20 x 20)
 
 **Stretch:** 0.2 0.2   |   **Sheer:** 0.2 0.2    |   **Bend:** 0.2 0.2    |   **dt:** 0.1    |   **mass:** 1
